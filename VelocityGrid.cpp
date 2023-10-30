@@ -43,9 +43,10 @@ VelocityGrid::VelocityGrid(int Nx, int Ny, int Nz, double v_cut) {
     this -> Ny = Ny;
     this -> Nz = Nz;
     this -> v_cut = v_cut;
-    for (int i = 0; i < Nx; i++) v_x.push_back(-v_cut + i * 2 * v_cut / (Nx - 1));
-    for (int i = 0; i < Ny; i++) v_y.push_back(-v_cut + i * 2 * v_cut / (Ny - 1));
-    for (int i = 0; i < Nz; i++) v_z.push_back(-v_cut + i * 2 * v_cut / (Nz - 1));
+    for (int i = 0; i < Nx; i++) v_x.push_back(-v_cut + (i + 0.5) * 2 * v_cut / Nx);
+    for (int i = 0; i < Ny; i++) v_y.push_back(-v_cut + (i + 0.5) * 2 * v_cut / Ny);
+    for (int i = 0; i < Nz; i++) v_z.push_back(-v_cut + (i + 0.5) * 2 * v_cut / Nz);
+    distr.resize(Nx * Ny * Nz);
 }
 
 VelocityGrid::VelocityGrid(int N, double v_cut) : VelocityGrid::VelocityGrid(N, N, N, v_cut) {}
