@@ -22,9 +22,9 @@ double H(unsigned int z, unsigned int p, unsigned int dim) {
         double prod = 1;
         for (unsigned int n = 1; n <= dim; n++) {
             mod_buf = mod_buf * z % p;
-            prod *= pow(1 - 2 * ((double)mod_buf / p), 2);
+            prod *= 1 - 2 * ((double)mod_buf / p);
         }
-        sum += prod;
+        sum += prod * prod;
     }
     return sum;
 }
@@ -33,6 +33,8 @@ std::vector<unsigned int> getHArgmins(unsigned int p, unsigned int dim) {
     std::vector<unsigned int> argmins = {1};
     double min = H(1, p, dim);
     for (unsigned int z = 2; z <= (p - 1) / 2; z++) {
+        if (z % 1000 == 0)
+            std::cout << "z = " << z << std::endl;
         if (H(z, p, dim) == min)
             argmins.push_back(z);
         else if (H(z, p, dim) < min) {
@@ -42,6 +44,20 @@ std::vector<unsigned int> getHArgmins(unsigned int p, unsigned int dim) {
         }
     }
     return argmins;
+}
+
+unsigned int getHArgmin(unsigned int p, unsigned int dim) {
+    unsigned int argmin = 1;
+    double min = H(1, p, dim);
+    for (unsigned int z = 2; z <= (p - 1) / 2; z++) {
+        if (z % 1000 == 0)
+            std::cout << "z = " << z << std::endl;
+        if (H(z, p, dim) < min) {
+            min = H(z, p, dim);
+            argmin = z;
+        }
+    }
+    return argmin;
 }
 
 std::vector<unsigned int> getCoefs(unsigned int b, unsigned int p, unsigned int dim) {
@@ -67,11 +83,16 @@ int main() {
     std::cout << "p_in init" << std::endl;
     unsigned int p = next_prime(p_in);
     std::cout << "p = " << p << std::endl;
-    std::vector<unsigned int> argmins = getHArgmins(p, 8);
-    std::cout << "got argmins" << argmins.size() << std::endl;
-    for (auto b : argmins) {
-        std::cout << "b = " << b << std::endl;
-        print_vector(getCoefs(b, p, 8));
-    }
+
+    // std::vector<unsigned int> argmins = getHArgmins(p, 8);
+    // std::cout << "got argmins" << argmins.size() << std::endl;
+    // for (auto b : argmins) {
+    //     std::cout << "b = " << b << std::endl;
+    //     print_vector(getCoefs(b, p, 8));
+    // }
+
+    unsigned int b = getHArgmin(p, 8);
+    std::cout << "b = " << b << std::endl;
+    print_vector(getCoefs(b, p, 8));
     return 0;
 }
