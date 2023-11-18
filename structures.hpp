@@ -43,7 +43,6 @@ struct InterpNodes {
     VectorIndex a, b, l, ls, m, ms;
     InterpNodes() {};
     InterpNodes(double r) : r(r) {};
-
 };
 
 #endif

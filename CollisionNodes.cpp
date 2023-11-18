@@ -37,8 +37,8 @@ void CollisionNodes::scaleValues() {
                 collisions[curr_node * 8 + i] *= s_max;
                 //got all necessary to calculate rel_velocities (g)
                 rel_velocities[curr_node * 3] = collisions[curr_node * 8 + 3] - collisions[curr_node * 8];
-                rel_velocities[curr_node * 3] = collisions[curr_node * 8 + 4] - collisions[curr_node * 8 + 1];
-                rel_velocities[curr_node * 3] = collisions[curr_node * 8 + 5] - collisions[curr_node * 8 + 2];
+                rel_velocities[curr_node * 3 + 1] = collisions[curr_node * 8 + 4] - collisions[curr_node * 8 + 1];
+                rel_velocities[curr_node * 3 + 2] = collisions[curr_node * 8 + 5] - collisions[curr_node * 8 + 2];
                 //got all necessary to calculate thetas
                 thetas[curr_node] = acos(sqrt(collisions[curr_node * 8 + i]));
             }
@@ -62,30 +62,27 @@ void CollisionNodes::checkOutOfSphere() {
 
 void CollisionNodes::recalculateRelVelocities() {
     for (int curr_node = 0; curr_node < n_nodes; curr_node++) {
-        
-        double g = sqrt(pow(rel_velocities[curr_node], 2) + pow(rel_velocities[curr_node + 1], 2) + pow(rel_velocities[curr_node + 2], 2));
-        double g_xy = sqrt(pow(rel_velocities[curr_node], 2) + pow(rel_velocities[curr_node + 1], 2));
+        double g = sqrt(pow(rel_velocities[3 * curr_node], 2) + pow(rel_velocities[3 * curr_node + 1], 2) + pow(rel_velocities[3 * curr_node + 2], 2));
+        double g_xy = sqrt(pow(rel_velocities[3 * curr_node], 2) + pow(rel_velocities[3 * curr_node + 1], 2));
         double sin_e = sin(collisions[curr_node * 8 + 7]), cos_e = cos(collisions[curr_node * 8 + 7]); 
         double sin_th = sin(thetas[curr_node]), cos_th = cos(thetas[curr_node]);
-        double g_x = rel_velocities[curr_node], g_y = rel_velocities[curr_node + 1], g_z = rel_velocities[curr_node + 2];
-        
+        double g_x = rel_velocities[3 * curr_node], g_y = rel_velocities[3 * curr_node + 1], g_z = rel_velocities[3 * curr_node + 2];
         if (g_xy == 0) {
             double new_x = g_x * sin_e * sin_th;
             double new_y = g_y * cos_e * sin_th;
             double new_z = g_z * cos_th;
-            rel_velocities[curr_node] = new_x;
-            rel_velocities[curr_node + 1] = new_y;
-            rel_velocities[curr_node + 2] = new_z; 
+            rel_velocities[3 * curr_node] = new_x;
+            rel_velocities[3 * curr_node + 1] = new_y;
+            rel_velocities[3 * curr_node + 2] = new_z; 
         }
         else {
-            double new_x = g_x * cos_th - sin_th / g_xy * (-g_x * g_z * cos_e + g * g_y * sin_e);
-            double new_y = g_y * cos_th - sin_th / g_xy * (-g_y * g_z * cos_e - g * g_x * sin_e);
+            double new_x = g_x * cos_th + sin_th / g_xy * (-g_x * g_z * cos_e + g * g_y * sin_e);
+            double new_y = g_y * cos_th + sin_th / g_xy * (-g_y * g_z * cos_e - g * g_x * sin_e);
             double new_z = g_z * cos_th + g_xy * cos_e * sin_th;
-            rel_velocities[curr_node] = new_x;
-            rel_velocities[curr_node + 1] = new_y;
-            rel_velocities[curr_node + 2] = new_z; 
+            rel_velocities[3 * curr_node] = new_x;
+            rel_velocities[3 * curr_node + 1] = new_y;
+            rel_velocities[3 * curr_node + 2] = new_z; 
         }
-        
     }
     g_recalculated = true;
     return;
