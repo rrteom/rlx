@@ -74,4 +74,5 @@ public:
     InterpNodes getInterpNodes(VectorVelocity v_a, VectorVelocity v_b, VectorVelocity v_a_new);
     VectorVelocity getVelocityByIx(VectorIndex ix);
     double calculateOmega(InterpNodes nd);
+    inline double getDistr(VectorIndex ix);
 };

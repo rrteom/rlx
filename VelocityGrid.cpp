@@ -57,6 +57,10 @@ inline int VelocityGrid::gridIndex(VectorIndex ix) {
     return gridIndex(ix.i, ix.j, ix.k);
 }
 
+inline double VelocityGrid::getDistr(VectorIndex ix) {
+    return distr[gridIndex(ix)];
+}
+
 void VelocityGrid::initDistr(double temp = 0.5, char distr_type = '1') {
     // init unnormalised
     double sum = 0;
@@ -265,6 +269,10 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
     return result;
 }
 
-double calculateOmega(InterpNodes nodes) {
-    
+double VelocityGrid::calculateOmega(InterpNodes nodes) {
+    double f_l_f_m = getDistr(nodes.l) * getDistr(nodes.m);
+    double v_diff = sqrt((getVelocityByIx(nodes.a) - getVelocityByIx(nodes.b)).pow2());
+    if (f_l_f_m == 0)
+        return 0;
+    return f_l_f_m * pow(getDistr(nodes.ls) * getDistr(nodes.ms) / f_l_f_m, nodes.r) * v_diff;
 }
