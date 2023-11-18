@@ -1,3 +1,6 @@
+#ifndef STRUCTURES_HEADER
+#define STRUCTURES_HEADER
+
 #include <cmath>
 
 struct VectorVelocity {
@@ -42,3 +45,5 @@ struct InterpNodes {
     InterpNodes(double r) : r(r) {};
 
 };
+
+#endif

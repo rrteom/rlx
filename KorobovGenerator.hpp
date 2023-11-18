@@ -1,3 +1,6 @@
+#ifndef KOROBOV_GENERATOR
+#define KOROBOV_GENERATOR
+
 #include <vector>
 
 struct KorobovCoefs {
@@ -13,3 +16,5 @@ unsigned int getHArgmin(unsigned int p, unsigned int dim);
 std::vector<unsigned int> getCoefs(unsigned int b, unsigned int p, unsigned int dim);
 std::vector<unsigned int> generateKorobovCoefs(unsigned int N, unsigned int dim);
 void print_vector(std::vector<unsigned int> vec);
+
+#endif

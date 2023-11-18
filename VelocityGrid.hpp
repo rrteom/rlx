@@ -1,3 +1,6 @@
+#ifndef VELOCITY_GRID
+#define VELOCITY_GRID
+
 #include <vector>
 #include <cmath>
 #include <tuple>
@@ -35,3 +38,5 @@ public:
     double calculateOmega(InterpNodes nd);
     inline double getDistr(VectorIndex ix);
 };
+
+#endif

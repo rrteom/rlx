@@ -61,7 +61,7 @@ inline double VelocityGrid::getDistr(VectorIndex ix) {
     return distr[gridIndex(ix)];
 }
 
-void VelocityGrid::initDistr(double temp = 0.5, char distr_type = '1') {
+void VelocityGrid::initDistr(double temp, char distr_type) {
     // init unnormalised
     double sum = 0;
     for (int i = 0; i < v_x.size(); i++) {
@@ -74,7 +74,7 @@ void VelocityGrid::initDistr(double temp = 0.5, char distr_type = '1') {
         }
     }
     // normalisation
-    sum *= pow(2 * v_cut, 3) / (Nx - 1) / (Ny - 1) / (Nz - 1); 
+    sum *= pow(2 * v_cut, 3) / Nx / Ny / Nz;
     for (int i = 0; i < v_x.size(); i++) {
         for (int j = 0; j < v_y.size(); j++) {
             for (int k = 0; k < v_z.size(); k++) {
@@ -91,6 +91,16 @@ void VelocityGrid::saveToFile(std::string path) {
     out_stream << Nx << ' ' << Ny << ' ' << Nz << ' ' << v_cut << std::endl;
     for (int i = 0; i < distr.size(); i++)
         out_stream << distr[i] << ' ';
+    out_stream << std::endl;
+    for (auto i: v_x) 
+        out_stream << i << ' ';
+    out_stream << std::endl;
+    for (auto i: v_y) 
+        out_stream << i << ' ';
+    out_stream << std::endl;
+    for (auto i: v_z) 
+        out_stream << i << ' ';
+    out_stream << std::endl;
     out_stream.close();
     return;
 }
