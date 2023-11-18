@@ -71,28 +71,15 @@ std::vector<unsigned int> getCoefs(unsigned int b, unsigned int p, unsigned int 
     return coefs;
 }
 
+std::vector<unsigned int> generateKorobovCoefs(unsigned int p_in, unsigned int dim, unsigned int n_nodes) {
+    unsigned int p = next_prime(p_in);
+    unsigned int b = getHArgmin(p, dim);
+    return getCoefs(b, p, dim);
+}
+
 void print_vector(std::vector<unsigned int> vec) {
     for (auto i : vec) 
         std::cout << i << ' ';
     std::cout << std::endl;
     return;
-}
-
-int main() {
-    unsigned int p_in = 50000;
-    std::cout << "p_in init" << std::endl;
-    unsigned int p = next_prime(p_in);
-    std::cout << "p = " << p << std::endl;
-
-    // std::vector<unsigned int> argmins = getHArgmins(p, 8);
-    // std::cout << "got argmins" << argmins.size() << std::endl;
-    // for (auto b : argmins) {
-    //     std::cout << "b = " << b << std::endl;
-    //     print_vector(getCoefs(b, p, 8));
-    // }
-
-    unsigned int b = getHArgmin(p, 8);
-    std::cout << "b = " << b << std::endl;
-    print_vector(getCoefs(b, p, 8));
-    return 0;
 }
