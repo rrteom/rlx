@@ -72,6 +72,7 @@ public:
     VectorVelocity gridLock(VectorVelocity vv);
     VectorIndex getClosestVeloctyIx(VectorVelocity vv);
     InterpNodes getInterpNodes(VectorVelocity v_a, VectorVelocity v_b, VectorVelocity v_a_new);
+    InterpNodes getInterpNodes(std::tuple<VectorVelocity, VectorVelocity, VectorVelocity>);
     VectorVelocity getVelocityByIx(VectorIndex ix);
     double calculateOmega(InterpNodes nd);
     inline double getDistr(VectorIndex ix);

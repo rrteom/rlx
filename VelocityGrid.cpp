@@ -269,6 +269,10 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
     return result;
 }
 
+InterpNodes VelocityGrid::getInterpNodes(std::tuple<VectorVelocity, VectorVelocity, VectorVelocity> tupl) {
+    return getInterpNodes(std::get<0>(tupl), std::get<1>(tupl), std::get<2>(tupl));
+}
+
 double VelocityGrid::calculateOmega(InterpNodes nodes) {
     double f_l_f_m = getDistr(nodes.l) * getDistr(nodes.m);
     double v_diff = sqrt((getVelocityByIx(nodes.a) - getVelocityByIx(nodes.b)).pow2());
