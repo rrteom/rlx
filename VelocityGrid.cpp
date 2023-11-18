@@ -189,7 +189,7 @@ VectorVelocity VelocityGrid::getVelocityByIx(VectorIndex ix) {
 InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b, VectorVelocity v_a_new) {
     VectorVelocity v_near = gridLock(v_a_new), v_near_1 = gridLock(v_a + v_b - v_a_new);
     if ((v_near.pow2() > pow(v_cut, 2)) || (v_near_1.pow2() > pow(v_cut, 2))) {
-        return InterpNodes(-1); // if r < 0 we deactivate (do not count) collision
+        return InterpNodes(-1); // if r < 0 deactivate (do not count) collision
     }
     VectorIndex eta_near = getClosestVeloctyIx(v_near), eta_near_1 = getClosestVeloctyIx(v_near_1);
     
@@ -289,4 +289,18 @@ double VelocityGrid::calculateOmega(InterpNodes nodes) {
     if (f_l_f_m == 0)
         return 0;
     return f_l_f_m * pow(getDistr(nodes.ls) * getDistr(nodes.ms) / f_l_f_m, nodes.r) * v_diff;
+}
+
+void VelocityGrid::updateDistr(InterpNodes nodes, double omega, double constant) {
+
+    distr[gridIndex(nodes.a)] += constant * omega;
+    distr[gridIndex(nodes.b)] += constant * omega;
+
+    distr[gridIndex(nodes.l)] += -(1 - nodes.r) * constant * omega;
+    distr[gridIndex(nodes.m)] += -(1 - nodes.r) * constant * omega;
+
+    distr[gridIndex(nodes.ls)] += -nodes.r * constant * omega;
+    distr[gridIndex(nodes.ms)] += -nodes.r * constant * omega;
+    
+    return; 
 }

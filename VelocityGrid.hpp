@@ -37,6 +37,7 @@ public:
     VectorVelocity getVelocityByIx(VectorIndex ix);
     double calculateOmega(InterpNodes nd);
     inline double getDistr(VectorIndex ix);
+    void updateDistr(InterpNodes nodes, double omega, double constant);
 };
 
 #endif
