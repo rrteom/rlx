@@ -117,6 +117,10 @@ std::tuple<VectorVelocity, VectorVelocity, VectorVelocity> CollisionNodes::getVe
     return std::tuple(v_a, v_b, v_a_new);
 }
 
+bool CollisionNodes::isActive(int coll_no) {
+    return is_active[coll_no];
+}
+
 void CollisionNodes::saveToFile(std::string path) {
     std::ofstream out_stream;
     out_stream.open(path);

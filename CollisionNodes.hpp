@@ -23,7 +23,7 @@ public:
     void recalculateRelVelocities();
     std::pair<VectorVelocity, VectorVelocity> afterCollisionVelocities(int collision_no); // just for testing
     std::tuple<VectorVelocity, VectorVelocity, VectorVelocity> getVelocitiesForInterp(int coll_no); 
-
+    bool isActive(int coll_no);
     void saveToFile(std::string path);
 };
 
