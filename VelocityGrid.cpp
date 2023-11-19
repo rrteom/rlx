@@ -3,6 +3,7 @@
 #include <tuple>
 #include <string>
 #include <fstream>
+#include <iostream>
 #include "VelocityGrid.hpp"
 
 
@@ -187,6 +188,7 @@ VectorVelocity VelocityGrid::getVelocityByIx(VectorIndex ix) {
 }
 
 InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b, VectorVelocity v_a_new) {
+    
     VectorVelocity v_near = gridLock(v_a_new), v_near_1 = gridLock(v_a + v_b - v_a_new);
     if ((v_near.pow2() > pow(v_cut, 2)) || (v_near_1.pow2() > pow(v_cut, 2))) {
         return InterpNodes(-1); // if r < 0 deactivate (do not count) collision
@@ -221,7 +223,7 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
     result.a = getClosestVeloctyIx(v_a);
     result.b = getClosestVeloctyIx(v_b);
 
-    if (fabs(energ_around[q_near] - energ_0) < 1e-18) {
+    if (fabs(energ_around[q_near] - energ_0) < 1e-7) {
         result.r = 1;
         result.l = eta_near;
         result.ls = eta_near;
@@ -231,13 +233,15 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
     }
     else if (energ_around[q_near] > energ_0) {
         double min_distance_2 = -1;
-        for (int q; q < eta_around.size(); q++) {
-            if ((energ_around[q] > energ_0) || (getVelocityByIx(eta_around[q]).pow2() > pow(v_cut, 2)))
+        for (int q = 0; q < eta_around.size(); q++) {
+            if ((energ_around[q] > energ_0) || (getVelocityByIx(eta_around[q]).pow2() > pow(v_cut, 2))) {
                 continue;
+            }
             VectorIndex this_index = eta_around[q];
             VectorIndex pair_index = result.a + result.b - this_index;
-            if (getVelocityByIx(pair_index).pow2() > pow(v_cut, 2))
+            if (getVelocityByIx(pair_index).pow2() > pow(v_cut, 2)) {
                 continue;
+            }
             double distance_2 = (v_a_new - getVelocityByIx(this_index)).pow2();
             if ((min_distance_2 < 0) || (distance_2 < min_distance_2)) {
                 min_distance_2 = distance_2;
@@ -246,21 +250,24 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
                 energ_1 = energ_around[q];
             }
         }
-        if (min_distance_2 < 0) 
+        if (min_distance_2 < 0) {
             return InterpNodes(-1); 
+        }
         result.ls = eta_near;
         result.ms = eta_near_1;
         energ_2 = energ_around[q_near];
     }
     else {
         double min_distance_2 = -1;
-        for (int q; q < eta_around.size(); q++) {
-            if ((energ_around[q] < energ_0) || (getVelocityByIx(eta_around[q]).pow2() > pow(v_cut, 2)))
+        for (int q = 0; q < eta_around.size(); q++) {
+            if ((energ_around[q] < energ_0) || (getVelocityByIx(eta_around[q]).pow2() > pow(v_cut, 2))) {
                 continue;
+            }
             VectorIndex this_index = eta_around[q];
             VectorIndex pair_index = result.a + result.b - this_index;
-            if (getVelocityByIx(pair_index).pow2() > pow(v_cut, 2))
+            if (getVelocityByIx(pair_index).pow2() > pow(v_cut, 2)) {
                 continue;
+            }
             double distance_2 = (v_a_new - getVelocityByIx(this_index)).pow2();
             if ((min_distance_2 < 0) || (distance_2 < min_distance_2)) {
                 min_distance_2 = distance_2;
@@ -269,8 +276,9 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
                 energ_2 = energ_around[q];
             }
         }
-        if (min_distance_2 < 0) 
+        if (min_distance_2 < 0) {
             return InterpNodes(-1);
+        }
         result.l = eta_near;
         result.m = eta_near_1;
         energ_1 = energ_around[q_near];
@@ -292,15 +300,22 @@ double VelocityGrid::calculateOmega(InterpNodes nodes) {
 }
 
 void VelocityGrid::updateDistr(InterpNodes nodes, double omega, double constant) {
+    double new_f_a = distr[gridIndex(nodes.a)] + constant * omega;
+    double new_f_b = distr[gridIndex(nodes.b)] + constant * omega;
+    double new_f_l = distr[gridIndex(nodes.l)] -(1 - nodes.r) * constant * omega;
+    double new_f_m = distr[gridIndex(nodes.m)] -(1 - nodes.r) * constant * omega;
+    double new_f_ls = distr[gridIndex(nodes.ls)] -nodes.r * constant * omega;
+    double new_f_ms = distr[gridIndex(nodes.ms)] -nodes.r * constant * omega;
 
-    distr[gridIndex(nodes.a)] += constant * omega;
-    distr[gridIndex(nodes.b)] += constant * omega;
+    if ((new_f_l >= 0) && (new_f_m >= 0) && (new_f_ls >= 0) && (new_f_ms >= 0) && (new_f_a >= 0) && (new_f_b >= 0)) {
+        distr[gridIndex(nodes.a)] = new_f_a;
+        distr[gridIndex(nodes.b)] = new_f_b;
 
-    distr[gridIndex(nodes.l)] += -(1 - nodes.r) * constant * omega;
-    distr[gridIndex(nodes.m)] += -(1 - nodes.r) * constant * omega;
+        distr[gridIndex(nodes.l)] = new_f_l;
+        distr[gridIndex(nodes.m)] = new_f_m;
 
-    distr[gridIndex(nodes.ls)] += -nodes.r * constant * omega;
-    distr[gridIndex(nodes.ms)] += -nodes.r * constant * omega;
-    
-    return; 
+        distr[gridIndex(nodes.ls)] = new_f_ls;
+        distr[gridIndex(nodes.ms)] = new_f_ms;
+    }
+    return;
 }
