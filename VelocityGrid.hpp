@@ -38,6 +38,12 @@ public:
     double calculateOmega(InterpNodes nd);
     inline double getDistr(VectorIndex ix);
     void updateDistr(InterpNodes nodes, double omega, double constant);
+    
+    double getConcentration();
+    double getEnergy();
+    VectorVelocity getMomentum();
+    void printIntegrals();
+
 };
 
 #endif

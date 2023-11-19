@@ -2,6 +2,7 @@
 #define STRUCTURES_HEADER
 
 #include <cmath>
+#include <iostream>
 
 struct VectorVelocity {
     double x, y, z;
@@ -14,6 +15,9 @@ struct VectorVelocity {
     };
     VectorVelocity operator/(const double& d) const {
         return VectorVelocity(x / d, y / d, z / d);
+    } 
+    VectorVelocity operator*(const double& d) const {
+        return VectorVelocity(x * d, y * d, z * d);
     } 
     double pow2() const {
         return pow(x, 2) + pow(y, 2) + pow(z, 2);
@@ -36,6 +40,10 @@ struct VectorIndex {
         else
             return false;
     }; 
+
+    void print() {
+        std::cout << i << ' ' << j << ' ' << k << std::endl;
+    };
 };
 
 struct InterpNodes {
@@ -43,6 +51,22 @@ struct InterpNodes {
     VectorIndex a, b, l, ls, m, ms;
     InterpNodes() {};
     InterpNodes(double r) : r(r) {};
+    void print() {
+        std::cout << "a ";
+        a.print();
+        std::cout << "b ";
+        b.print();
+        std::cout << "l ";
+        l.print();
+        std::cout << "m ";
+        m.print();
+        std::cout << "ls ";
+        ls.print();
+        std::cout << "ms ";
+        ms.print();
+        std::cout << r << std::endl;
+        return;
+    };
 };
 
 #endif
