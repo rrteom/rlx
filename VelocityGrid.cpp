@@ -223,14 +223,14 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
     result.a = getClosestVeloctyIx(v_a);
     result.b = getClosestVeloctyIx(v_b);
 
-    if (fabs(energ_around[q_near] - energ_0) < 1e-6) {
+    if (fabs(energ_around[q_near] - energ_0) < 1e-12) {
         result.r = 1;
         result.l = eta_near;
         result.ls = eta_near;
         result.m = eta_near_1;
         result.ms = eta_near_1;
-        if (((result.a == result.l) && (result.b == result.m)) || ((result.a == result.ls) && (result.b == result.ms)))
-            return InterpNodes(-1);
+        // if (((result.a == result.l) && (result.b == result.m)) || ((result.a == result.ls) && (result.b == result.ms)))
+        //     return InterpNodes(-1);
         return result;
     }
     else if (energ_around[q_near] > energ_0) {
@@ -285,8 +285,8 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
         result.m = eta_near_1;
         energ_1 = energ_around[q_near];
     }
-    if (((result.a == result.l) && (result.b == result.m)) || ((result.a == result.ls) && (result.b == result.ms)))
-        return InterpNodes(-1);
+    // if (((result.a == result.l) && (result.b == result.m)) || ((result.a == result.ls) && (result.b == result.ms)))
+    //     return InterpNodes(-1);
 
     result.r = (energ_0 / energ_1 - 1) / (energ_2 / energ_1 - 1);
     return result;
@@ -298,10 +298,11 @@ InterpNodes VelocityGrid::getInterpNodes(std::tuple<VectorVelocity, VectorVeloci
 
 double VelocityGrid::calculateOmega(InterpNodes nodes) {
     double f_l_f_m = getDistr(nodes.l) * getDistr(nodes.m);
+    double f_a_f_b = getDistr(nodes.a) * getDistr(nodes.b);
     double v_diff = sqrt((getVelocityByIx(nodes.a) - getVelocityByIx(nodes.b)).pow2());
     if (f_l_f_m == 0)
         return 0;
-    return f_l_f_m * pow(getDistr(nodes.ls) * getDistr(nodes.ms) / f_l_f_m, nodes.r) * v_diff;
+    return (f_l_f_m * pow(getDistr(nodes.ls) * getDistr(nodes.ms) / f_l_f_m, nodes.r) - f_a_f_b) * v_diff;
 }
 
 void VelocityGrid::updateDistr(InterpNodes nodes, double omega, double constant) {

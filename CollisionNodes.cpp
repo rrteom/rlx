@@ -21,8 +21,8 @@ void CollisionNodes::randomizeNodes(std::vector<unsigned int> korobov_coefs) {
     double trashed_int_part;
     for (int curr_node = 0; curr_node < n_nodes; curr_node++) {
         for (int i = 0; i < 8; i++) {
-            collisions[curr_node * 8 + i] = modf(korobov_coefs[i] * (curr_node + 1) / static_cast<double>(n_nodes), &trashed_int_part);
-            // collisions[curr_node * 8 + i] = std::rand() / static_cast<double>(RAND_MAX); // uniform [0, 1]
+            // collisions[curr_node * 8 + i] = modf(korobov_coefs[i] * (curr_node + 1) / static_cast<double>(n_nodes), &trashed_int_part);
+            collisions[curr_node * 8 + i] = std::rand() / static_cast<double>(RAND_MAX); // uniform [0, 1]
         }
     }
 }
