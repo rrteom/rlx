@@ -1,7 +1,7 @@
-all: test_main.o VelocityGrid.o CollisionNodes.o KorobovGenerator.o UtilsRandom.o
-	g++ test_main.o VelocityGrid.o CollisionNodes.o KorobovGenerator.o UtilsRandom.o -o test_main
-test_main.o: test_main.cpp
-	g++ -c test_main.cpp
+all: test_upd.o VelocityGrid.o CollisionNodes.o KorobovGenerator.o UtilsRandom.o
+	g++ test_upd.o VelocityGrid.o CollisionNodes.o KorobovGenerator.o UtilsRandom.o -o test_upd
+test_upd.o: test_upd.cpp
+	g++ -c test_upd.cpp
 CollisionNodes.o: CollisionNodes.cpp
 	g++ -c CollisionNodes.cpp
 KorobovGenerator.o: KorobovGenerator.cpp

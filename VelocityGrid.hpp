@@ -38,6 +38,7 @@ public:
     double calculateOmega(InterpNodes nd);
     inline double getDistr(VectorIndex ix);
     void updateDistr(InterpNodes nodes, double omega, double constant);
+    void copyDistr(std::vector<double>*);
     
     double getConcentration();
     double getEnergy();

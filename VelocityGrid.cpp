@@ -75,7 +75,7 @@ void VelocityGrid::initDistr(double temp, char distr_type) {
         }
     }
     // normalisation
-    sum *= pow(2 * v_cut, 3) / Nx / Ny / Nz * 1000; // множитель 1000 для уменьшения влияния машинной ошибки в вычислениях 
+    sum *= pow(2 * v_cut, 3) / Nx / Ny / Nz;
     for (int i = 0; i < v_x.size(); i++) {
         for (int j = 0; j < v_y.size(); j++) {
             for (int k = 0; k < v_z.size(); k++) {
@@ -223,12 +223,14 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
     result.a = getClosestVeloctyIx(v_a);
     result.b = getClosestVeloctyIx(v_b);
 
-    if (fabs(energ_around[q_near] - energ_0) < 1e-18) {
+    if (fabs(energ_around[q_near] - energ_0) < 1e-6) {
         result.r = 1;
         result.l = eta_near;
         result.ls = eta_near;
         result.m = eta_near_1;
         result.ms = eta_near_1;
+        if (((result.a == result.l) && (result.b == result.m)) || ((result.a == result.ls) && (result.b == result.ms)))
+            return InterpNodes(-1);
         return result;
     }
     else if (energ_around[q_near] > energ_0) {
@@ -283,7 +285,10 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
         result.m = eta_near_1;
         energ_1 = energ_around[q_near];
     }
-    result.r = (energ_0 - energ_1) / (energ_2 - energ_1);
+    if (((result.a == result.l) && (result.b == result.m)) || ((result.a == result.ls) && (result.b == result.ms)))
+        return InterpNodes(-1);
+
+    result.r = (energ_0 / energ_1 - 1) / (energ_2 / energ_1 - 1);
     return result;
 }
 
@@ -300,22 +305,31 @@ double VelocityGrid::calculateOmega(InterpNodes nodes) {
 }
 
 void VelocityGrid::updateDistr(InterpNodes nodes, double omega, double constant) {
+    // std::cout << "in update\n";
     double c_o = constant * omega, r_c_o = nodes.r * constant * omega;
+    // std::cout << c_o << ' ' << r_c_o << '\n';
     double not_r_c_o = c_o - r_c_o;
-    double f_a_old = distr[gridIndex(nodes.a)], f_b_old = distr[gridIndex(nodes.b)];
-    double f_l_old = distr[gridIndex(nodes.l)], f_m_old = distr[gridIndex(nodes.m)];
-    double f_ls_old = distr[gridIndex(nodes.ls)], f_ms_old = distr[gridIndex(nodes.ms)];
-
+    // double f_a_old = distr[gridIndex(nodes.a)], f_b_old = distr[gridIndex(nodes.b)];
+    // double f_l_old = distr[gridIndex(nodes.l)], f_m_old = distr[gridIndex(nodes.m)];
+    // double f_ls_old = distr[gridIndex(nodes.ls)], f_ms_old = distr[gridIndex(nodes.ms)];
+    // std::cout << f_a_old << ' ' << f_b_old << ' '  << f_l_old << ' '  << f_m_old <<' ' << f_ls_old << ' '  << f_ms_old << '\n'; 
+    
     double new_f_a = distr[gridIndex(nodes.a)] + c_o;
     double new_f_b = distr[gridIndex(nodes.b)] + c_o;
-    // double new_f_l = distr[gridIndex(nodes.l)] - not_r_c_o;
-    // double new_f_m = distr[gridIndex(nodes.m)] - not_r_c_o;
+
+    double new_f_l = distr[gridIndex(nodes.l)] - not_r_c_o;
+    double new_f_m = distr[gridIndex(nodes.m)] - not_r_c_o; // new
+
     double new_f_ls = distr[gridIndex(nodes.ls)] - r_c_o;
     double new_f_ms = distr[gridIndex(nodes.ms)] - r_c_o;
-    double new_f_l = f_l_old + f_a_old + f_ls_old - new_f_a - new_f_ls;
-    double new_f_m = f_m_old + f_b_old + f_ms_old - new_f_b - new_f_ms;
 
+    // double new_f_l = f_l_old + f_a_old + f_ls_old - new_f_a - new_f_ls;
+    // double new_f_m = f_m_old + f_b_old + f_ms_old - new_f_b - new_f_ms; // old
+
+    // std::cout << new_f_a << ' ' << new_f_b << ' '  << new_f_l << ' '  << new_f_m << ' ' <<new_f_ls << ' '  << new_f_ms << '\n';
+    // std::cout << ((new_f_l >= 0) && (new_f_m >= 0) && (new_f_ls >= 0) && (new_f_ms >= 0) && (new_f_a >= 0) && (new_f_b >= 0)) << '\n';
     if ((new_f_l >= 0) && (new_f_m >= 0) && (new_f_ls >= 0) && (new_f_ms >= 0) && (new_f_a >= 0) && (new_f_b >= 0)) {
+        // std::cout << "updating";
         distr[gridIndex(nodes.a)] = new_f_a;
         distr[gridIndex(nodes.b)] = new_f_b;
 
@@ -329,7 +343,7 @@ void VelocityGrid::updateDistr(InterpNodes nodes, double omega, double constant)
 }
 
 double VelocityGrid::getConcentration() {
-    double phase_volume = pow(2 * v_cut, 3) / Nx / Ny / Nz * 1000; 
+    double phase_volume = pow(2 * v_cut, 3) / Nx / Ny / Nz; 
     double sum = 0;
     for (int i = 0; i < distr.size(); i++) {
         sum += distr[i] * phase_volume;
@@ -338,7 +352,7 @@ double VelocityGrid::getConcentration() {
 }
 
 double VelocityGrid::getEnergy() {
-    double phase_volume = pow(2 * v_cut, 3) / Nx / Ny / Nz * 1000;
+    double phase_volume = pow(2 * v_cut, 3) / Nx / Ny / Nz;
     double sum = 0;
     for (int x = 0; x < Nx; x++) {
         for (int y = 0; y < Ny; y++) {
@@ -351,7 +365,7 @@ double VelocityGrid::getEnergy() {
 }
 
 VectorVelocity VelocityGrid::getMomentum() {
-    double phase_volume = pow(2 * v_cut, 3) / Nx / Ny / Nz * 1000;
+    double phase_volume = pow(2 * v_cut, 3) / Nx / Ny / Nz;
     VectorVelocity sum(0, 0, 0);
     for (int x = 0; x < Nx; x++) {
         for (int y = 0; y < Ny; y++) {
@@ -368,4 +382,12 @@ void VelocityGrid::printIntegrals() {
     VectorVelocity v = getMomentum();
     std::cout << "momentum " << v.x << ' ' << v.y << ' '<< v.z << std::endl;
     std::cout << "energy " << getEnergy() << std::endl;
+}
+
+void VelocityGrid::copyDistr(std::vector<double>* v) {
+    for (auto i: distr) {
+        v->push_back(i);
+    }
+
+    return;
 }
