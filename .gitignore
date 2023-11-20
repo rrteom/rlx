@@ -1,5 +1,6 @@
 *.pdf
 .vscode
+test_main.cpp
 *.txt
 *.o
 logs/
