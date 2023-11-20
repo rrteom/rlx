@@ -1,6 +1,5 @@
 *.pdf
 .vscode
-test*
 *.txt
 *.o
 logs/
