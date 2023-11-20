@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 #include "VelocityGrid.hpp"
 
 
@@ -189,11 +190,13 @@ VectorVelocity VelocityGrid::getVelocityByIx(VectorIndex ix) {
 
 InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b, VectorVelocity v_a_new) {
     
-    VectorVelocity v_near = gridLock(v_a_new), v_near_1 = gridLock(v_a + v_b - v_a_new);
+    VectorVelocity v_near = gridLock(v_a_new);
+    VectorIndex eta_near = getClosestVeloctyIx(v_near);
+    VectorIndex eta_near_1 = getClosestVeloctyIx(v_a) + getClosestVeloctyIx(v_b) - eta_near;
+    VectorVelocity v_near_1 = getVelocityByIx(eta_near_1);
     if ((v_near.pow2() > pow(v_cut, 2)) || (v_near_1.pow2() > pow(v_cut, 2))) {
         return InterpNodes(-1); // if r < 0 deactivate (do not count) collision
     }
-    VectorIndex eta_near = getClosestVeloctyIx(v_near), eta_near_1 = getClosestVeloctyIx(v_near_1);
     
     int i_center = static_cast<int>(floor(Nx / 2 * (1 + v_a_new.x / v_cut) - 0.5));
     int j_center = static_cast<int>(floor(Ny / 2 * (1 + v_a_new.y / v_cut) - 0.5));
@@ -222,18 +225,22 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
     InterpNodes result;
     result.a = getClosestVeloctyIx(v_a);
     result.b = getClosestVeloctyIx(v_b);
+    if (result.a == result.b)
+        return InterpNodes(-1);
 
-    if (fabs(energ_around[q_near] - energ_0) < 1e-12) {
+    if (fabs(energ_around[q_near] - energ_0) == 0) {
+        // std::cout << "e near equal\n";
         result.r = 1;
         result.l = eta_near;
         result.ls = eta_near;
         result.m = eta_near_1;
         result.ms = eta_near_1;
-        // if (((result.a == result.l) && (result.b == result.m)) || ((result.a == result.ls) && (result.b == result.ms)))
-        //     return InterpNodes(-1);
+        if (((result.a == result.l) && (result.b == result.m)) && ((result.a == result.ls) && (result.b == result.ms)))
+            return InterpNodes(-1);
         return result;
     }
     else if (energ_around[q_near] > energ_0) {
+        // std::cout << "e near more\n";
         double min_distance_2 = -1;
         for (int q = 0; q < eta_around.size(); q++) {
             if ((energ_around[q] > energ_0) || (getVelocityByIx(eta_around[q]).pow2() > pow(v_cut, 2))) {
@@ -260,6 +267,7 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
         energ_2 = energ_around[q_near];
     }
     else {
+        // std::cout << "e near less\n";
         double min_distance_2 = -1;
         for (int q = 0; q < eta_around.size(); q++) {
             if ((energ_around[q] < energ_0) || (getVelocityByIx(eta_around[q]).pow2() > pow(v_cut, 2))) {
@@ -285,8 +293,8 @@ InterpNodes VelocityGrid::getInterpNodes(VectorVelocity v_a, VectorVelocity v_b,
         result.m = eta_near_1;
         energ_1 = energ_around[q_near];
     }
-    // if (((result.a == result.l) && (result.b == result.m)) || ((result.a == result.ls) && (result.b == result.ms)))
-    //     return InterpNodes(-1);
+    if (((result.a == result.l) && (result.b == result.m)) && ((result.a == result.ls) && (result.b == result.ms)))
+        return InterpNodes(-1);
 
     result.r = (energ_0 / energ_1 - 1) / (energ_2 / energ_1 - 1);
     return result;
@@ -382,7 +390,7 @@ void VelocityGrid::printIntegrals() {
     std::cout << "concentration " << getConcentration() << std::endl;
     VectorVelocity v = getMomentum();
     std::cout << "momentum " << v.x << ' ' << v.y << ' '<< v.z << std::endl;
-    std::cout << "energy " << getEnergy() << std::endl;
+    std::cout << std::setprecision(10) <<"energy " << getEnergy() << std::endl;
 }
 
 void VelocityGrid::copyDistr(std::vector<double>* v) {
